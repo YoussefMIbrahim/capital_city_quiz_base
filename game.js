@@ -1,24 +1,62 @@
-let randomCountryElement = document.querySelector('#random-country')
-let userAnswerElement = document.querySelector("#user-answer")
-let submitButton = document.querySelector("#submit-answer")
-let resultTextElement = document.querySelector('#result')
+let randomCountryElement = document.querySelector('#random-country');
+let userAnswerElement = document.querySelector("#user-answer");
+let submitButton = document.querySelector("#submit-answer");
+let resultTextElement = document.querySelector('#result');
 
 // TODO finish the script to challenge the user about their knowledge of capital cities.
 // An array of country codes is provided in the countries.js file. 
 // Your browser treats all JavaScript files as one big file, o
 // organized in the order of the script tags so the countriesAndCodes array is available to this script.
 
-console.log(countriesAndCodes)  // You don't need to log countriesAndCodes - just proving it is available 
+//console.log(countriesAndCodes);  // You don't need to log countriesAndCodes - just proving it is available
 
 
-// TODO when the page loads, select an element at random from the countriesAndCodes array
 
-// TODO display the country's name in the randomCountryElement 
+let countryCode = getRandomCountry();
+
+function getRandomCountry() {
+
+    let randomElement = countriesAndCodes[Math.floor(Math.random()*countriesAndCodes.length)];
+    randomCountryElement.innerHTML = randomElement['name'];
+
+    return randomElement['alpha-2']
+}
+
+
+function fetchingData() {
+    fetch(`https://api.worldbank.org/v2/country/${countryCode}?format=json`)
+        .then(res => res.json())
+        .then(countryData => {
+            console.log(countryData);
+            console.log(countryData[1][0]['capitalCity']);
+            return countryData[1][0]['capitalCity'];
+        })
+        .catch(err => {
+            console.log(err)
+        });
+
+
+}
+
+//  when the page loads, select an element at random from the countriesAndCodes array
+
+//  display the country's name in the randomCountryElement
+
+submitButton.addEventListener("click", () => {
+    // let userAnswer = userAnswerElement.value();
+
+    let capital = fetchingData();
+    console.log(capital)
+
+
+});
+
+
 
 // TODO add a click event handler to the submitButton.  When the user clicks the button,
 //  * read the text from the userAnswerElement 
 //  * Use fetch() to make a call to the World Bank API with the two-letter country code (from countriesAndCodes, example 'CN' or 'AF')
-//  * Verify no errors were encountered in the API call. If an error occurs, display an alert message. 
+//  * Verify no errors were encountered in the API call. If an error occurs, display an alert message.
 //  * If the API call was successful, extract the capital city from the World Bank API response.
 //  * Compare it to the user's answer. 
 //      You can decide how correct you require the user to be. At the minimum, the user's answer should be the same
