@@ -2,58 +2,93 @@ let randomCountryElement = document.querySelector('#random-country');
 let userAnswerElement = document.querySelector("#user-answer");
 let submitButton = document.querySelector("#submit-answer");
 let resultTextElement = document.querySelector('#result');
+let playAgainButton = document.querySelector("#play-again");
 
-// TODO finish the script to challenge the user about their knowledge of capital cities.
+// finish the script to challenge the user about their knowledge of capital cities.
 // An array of country codes is provided in the countries.js file. 
 // Your browser treats all JavaScript files as one big file, o
 // organized in the order of the script tags so the countriesAndCodes array is available to this script.
 
-//console.log(countriesAndCodes);  // You don't need to log countriesAndCodes - just proving it is available
+  // You don't need to log countriesAndCodes - just proving it is available
+
+let levenshtein = require('fast-levenshtein');
+// clearing html for response and getting random country code and name
+resultTextElement.innerHTML = '';
+let countryData = getRandomCountry();
 
 
+console.log(levenshtein.get('name','name'));
 
-let countryCode = getRandomCountry();
 
 function getRandomCountry() {
-
+    // getting a random value from array using math, and extracting the name and code from it
     let randomElement = countriesAndCodes[Math.floor(Math.random()*countriesAndCodes.length)];
-    randomCountryElement.innerHTML = randomElement['name'];
+    let countryName = randomElement['name'];
+    let countryCode = randomElement['alpha-2'];
 
-    return randomElement['alpha-2']
+    randomCountryElement.innerHTML = countryName;
+
+    return [countryCode, countryName]
 }
-
-
-function fetchingData() {
+// callback function with the name done that will do some whichcraft and heresy
+function fetchingData(done)  {
+    //getting the country code from the array
+    let countryCode = countryData[0];
+    // fetching data from the api with the specific country code
     fetch(`https://api.worldbank.org/v2/country/${countryCode}?format=json`)
+        //getting the response in json
         .then(res => res.json())
+        // naming the response
         .then(countryData => {
-            console.log(countryData);
-            console.log(countryData[1][0]['capitalCity']);
-            return countryData[1][0]['capitalCity'];
-        })
+            // getting the capital city from response and passing it to the callback function
+            let capital = countryData[1][0]['capitalCity'];
+
+            done(null,capital)
+
+        })// catching any errors and passing those to the callback function also
         .catch(err => {
-            console.log(err)
+            console.log(err);
+
+            done(err)
         });
 
-
 }
 
-//  when the page loads, select an element at random from the countriesAndCodes array
-
-//  display the country's name in the randomCountryElement
-
 submitButton.addEventListener("click", () => {
-    // let userAnswer = userAnswerElement.value();
+    //getting the user answer from html and the country from country data array
+    let userAnswer = userAnswerElement.value;
+    let countryName = countryData[1];
+    // getting error and capital cit from function
+    fetchingData(function (err,capCity) {
+        //checking if there's an error first
+        if (err){
+            console.log('oh noo an error')
+        }else { // if there's no error comparing user answeer to the correct answer and changing the inner html accordingly
+            if (capCity.toLowerCase() === userAnswer.toLowerCase() ){
+                resultTextElement.innerHTML = `Well Done the capital of ${countryName} is ${capCity}`
+            }else{
+                resultTextElement.innerHTML = 'Bad Done'
+            }
+        }
 
-    let capital = fetchingData();
-    console.log(capital)
+    });
+});
 
+playAgainButton.addEventListener("click",() =>{
+    // clearing the user input and result message
+    userAnswerElement.value= '';
+    resultTextElement.innerHTML = '';
+    // calling the previous function for the program to run again
+    countryData = getRandomCountry();
+    fetchingData(function () {
+
+    });
 
 });
 
 
 
-// TODO add a click event handler to the submitButton.  When the user clicks the button,
+//  add a click event handler to the submitButton.  When the user clicks the button,
 //  * read the text from the userAnswerElement 
 //  * Use fetch() to make a call to the World Bank API with the two-letter country code (from countriesAndCodes, example 'CN' or 'AF')
 //  * Verify no errors were encountered in the API call. If an error occurs, display an alert message.
