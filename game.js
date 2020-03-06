@@ -11,13 +11,14 @@ let playAgainButton = document.querySelector("#play-again");
 
   // You don't need to log countriesAndCodes - just proving it is available
 
-let levenshtein = require('fast-levenshtein');
+// let levenshtein = require('fast-levenshtein');
+
 // clearing html for response and getting random country code and name
 resultTextElement.innerHTML = '';
 let countryData = getRandomCountry();
 
-
-console.log(levenshtein.get('name','name'));
+// couldn't get this to work honeslty
+// console.log(levenshtein.get('name','name'));
 
 
 function getRandomCountry() {
